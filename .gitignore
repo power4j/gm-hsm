@@ -56,3 +56,10 @@ Cargo.lock
 /logs
 *.log
 *.log.*
+
+# AI tools
+.claude/
+.specify/
+openspec/
+AGENTS.md
+CLAUDE.md

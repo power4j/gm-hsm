@@ -1,0 +1,19 @@
+[package]
+name = "gm-hsm-sys"
+version = "0.1.0"
+edition = "2021"
+authors = [
+    "CJ <power4j@outlook.com>",
+]
+description = """
+FFI Types for cryptography device application interface specification.
+"""
+readme = "README.md"
+documentation = "https://docs.rs/gm-hsm-sys"
+repository = "https://github.com/power4j/gm-hsm"
+license = "MIT"
+keywords = ["GM", "cryptography", "PKI"]
+categories = ["hardware-support"]
+
+[features]
+skf = []

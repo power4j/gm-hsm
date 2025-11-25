@@ -3,12 +3,12 @@ name: Publish crates on crates.io
 on:
   workflow_dispatch:
     inputs:
-      skf-api-version:
-        description: "skf-api: major/minor/patch or semver or none if not updating derive crate"
+      gm-hsm-sys-version:
+        description: "gm-hsm-sys: major/minor/patch or semver or none if not updating derive crate"
         required: false
         default: "none"
-      skf-rs-version:
-        description: "skf-rs: major/minor/patch or semver or none if not updating derive crate"
+      gm-hsm-skf-version:
+        description: "gm-hsm-skf: major/minor/patch or semver or none if not updating derive crate"
         required: false
         default: "none"
 
@@ -44,50 +44,50 @@ jobs:
         run: |
           cargo install -q cargo-get cargo-edit
 
-      - name: "[skf-api] Bump"
-        if: "${{ github.event.inputs.skf-api-version == 'major' || github.event.inputs.skf-api-version == 'minor' || github.event.inputs.skf-api-version == 'patch' }}"
+      - name: "[gm-hsm-sys] Bump"
+        if: "${{ github.event.inputs.gm-hsm-sys-version == 'major' || github.event.inputs.gm-hsm-sys-version == 'minor' || github.event.inputs.gm-hsm-sys-version == 'patch' }}"
         #working-directory: ${{ github.workspace }}
         run: |
-          cargo set-version --bump ${{ github.event.inputs.skf-api-version}} -p skf-api
-          CRATE_TAG="$(cd skf-api && cargo get package.name)-$(cd skf-api && cargo get package.version --pretty)"
+          cargo set-version --bump ${{ github.event.inputs.gm-hsm-sys-version}} -p gm-hsm-sys
+          CRATE_TAG="$(cd gm-hsm-sys && cargo get package.name)-$(cd gm-hsm-sys && cargo get package.version --pretty)"
           git add .
           git commit -am "Release: $CRATE_TAG"
           git tag "$CRATE_TAG"
 
-      - name: "[skf-api] Push"
+      - name: "[gm-hsm-sys] Push"
         uses: ad-m/github-push-action@master
-        if: "${{ github.event.inputs.skf-api-version == 'major' || github.event.inputs.skf-api-version == 'minor' || github.event.inputs.skf-api-version == 'patch' }}"
+        if: "${{ github.event.inputs.gm-hsm-sys-version == 'major' || github.event.inputs.gm-hsm-sys-version == 'minor' || github.event.inputs.gm-hsm-sys-version == 'patch' }}"
         with:
           branch: ${{ github.ref }}
           tags: true
 
-      - name: "[skf-api] Publish"
-        if: "${{ github.event.inputs.skf-api-version == 'major' || github.event.inputs.skf-api-version == 'minor' || github.event.inputs.skf-api-version == 'patch' }}"
+      - name: "[gm-hsm-sys] Publish"
+        if: "${{ github.event.inputs.gm-hsm-sys-version == 'major' || github.event.inputs.gm-hsm-sys-version == 'minor' || github.event.inputs.gm-hsm-sys-version == 'patch' }}"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN  }}
-        run: cargo publish --no-verify -p skf-api
+        run: cargo publish --no-verify -p gm-hsm-sys
 
 
-      - name: "[skf-rs] Bump"
-        if: "${{ github.event.inputs.skf-rs-version == 'major' || github.event.inputs.skf-rs-version == 'minor' || github.event.inputs.skf-rs-version == 'patch' }}"
+      - name: "[gm-hsm-skf] Bump"
+        if: "${{ github.event.inputs.gm-hsm-skf-version == 'major' || github.event.inputs.gm-hsm-skf-version == 'minor' || github.event.inputs.gm-hsm-skf-version == 'patch' }}"
         #working-directory: ${{ github.workspace }}
         shell: bash
         run: |
-          cargo set-version --bump ${{ github.event.inputs.skf-rs-version}} -p skf-rs
-          CRATE_TAG="$(cd skf-rs && cargo get package.name)-$(cd skf-rs && cargo get package.version --pretty)"
+          cargo set-version --bump ${{ github.event.inputs.gm-hsm-skf-version}} -p gm-hsm-skf
+          CRATE_TAG="$(cd gm-hsm-skf && cargo get package.name)-$(cd gm-hsm-skf && cargo get package.version --pretty)"
           git add .
           git commit -am "Release: $CRATE_TAG"
           git tag "$CRATE_TAG"
 
-      - name: "[skf-rs] Push"
+      - name: "[gm-hsm-skf] Push"
         uses: ad-m/github-push-action@master
-        if: "${{ github.event.inputs.skf-rs-version == 'major' || github.event.inputs.skf-rs-version == 'minor' || github.event.inputs.skf-rs-version == 'patch' }}"
+        if: "${{ github.event.inputs.gm-hsm-skf-version == 'major' || github.event.inputs.gm-hsm-skf-version == 'minor' || github.event.inputs.gm-hsm-skf-version == 'patch' }}"
         with:
           branch: ${{ github.ref }}
           tags: true
 
-      - name: "[skf-rs] Publish"
-        if: "${{ github.event.inputs.skf-rs-version == 'major' || github.event.inputs.skf-rs-version == 'minor' || github.event.inputs.skf-rs-version == 'patch' }}"
+      - name: "[gm-hsm-skf] Publish"
+        if: "${{ github.event.inputs.gm-hsm-skf-version == 'major' || github.event.inputs.gm-hsm-skf-version == 'minor' || github.event.inputs.gm-hsm-skf-version == 'patch' }}"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN  }}
-        run: cargo publish --no-verify -p skf-rs
+        run: cargo publish --no-verify -p gm-hsm-skf
