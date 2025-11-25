@@ -2,8 +2,8 @@
 mod common;
 
 use crate::common::{describe_result, use_block_cipher, use_first_device};
-use skf_rs::spec::algorithm;
-use skf_rs::BlockCipherParameter;
+use gm_hsm_skf::spec::algorithm;
+use gm_hsm_skf::BlockCipherParameter;
 
 #[test]
 #[ignore]

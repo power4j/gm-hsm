@@ -20,8 +20,8 @@ impl Engine {
     /// [lib] - The library handle
     /// # Example
     /// ```no_run
-    /// use skf_rs::Engine;
-    /// use skf_rs::LibLoader;
+    /// use gm_hsm_skf::Engine;
+    /// use gm_hsm_skf::LibLoader;
     /// let _ = Engine::new(LibLoader::env_lookup().unwrap());
     /// ```
     pub fn new(lib: Library) -> Self {

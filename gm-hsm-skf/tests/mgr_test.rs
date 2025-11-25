@@ -1,7 +1,7 @@
 #[allow(dead_code)]
 mod common;
 
-use skf_rs::{Engine, LibLoader};
+use gm_hsm_skf::{Engine, LibLoader};
 use std::sync::Arc;
 use std::thread;
 

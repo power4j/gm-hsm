@@ -5,8 +5,8 @@ use crate::common::{
     describe_result, ext_ecc_key_pair, use_first_device_with_auth, TEST_ADMIN_PIN, TEST_USER_PIN,
 };
 use common::use_first_device;
+use gm_hsm_skf::{AppAttr, FILE_PERM_EVERYONE};
 use gm_hsm_sys::skf::types::ECCSignatureBlob;
-use skf_rs::{AppAttr, FILE_PERM_EVERYONE};
 use std::time::{Duration, SystemTime};
 
 #[test]

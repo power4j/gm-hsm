@@ -1,9 +1,9 @@
-use gm_hsm_sys::skf::types::{ECCPrivateKeyBlob, ECCPublicKeyBlob};
-use skf_rs::helper::auth::encrypt_auth_key_sm1_ecb;
-use skf_rs::{
+use gm_hsm_skf::helper::auth::encrypt_auth_key_sm1_ecb;
+use gm_hsm_skf::{
     AppAttr, DeviceManager, Engine, LibLoader, Result, SkfApp, SkfBlockCipher, SkfContainer,
     SkfDevice, FILE_PERM_EVERYONE, PIN_TYPE_ADMIN, PIN_TYPE_USER,
 };
+use gm_hsm_sys::skf::types::{ECCPrivateKeyBlob, ECCPublicKeyBlob};
 
 pub const TEST_APP_NAME_1: &str = "skf-rs-test-app-1";
 pub const TEST_ADMIN_PIN: &str = "12345678";

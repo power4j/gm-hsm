@@ -1,7 +1,7 @@
-use skf_rs::helper::auth::encrypt_auth_key_sm1_ecb;
-use skf_rs::helper::easy::{recreate_app, recreate_container};
-use skf_rs::spec::algorithm::{SGD_SM1_ECB, SGD_SM2_1};
-use skf_rs::{
+use gm_hsm_skf::helper::auth::encrypt_auth_key_sm1_ecb;
+use gm_hsm_skf::helper::easy::{recreate_app, recreate_container};
+use gm_hsm_skf::spec::algorithm::{SGD_SM1_ECB, SGD_SM2_1};
+use gm_hsm_skf::{
     AppAttr, BlockCipherParameter, Engine, LibLoader, SkfApp, SkfContainer, SkfDevice,
     FILE_PERM_EVERYONE, PIN_TYPE_USER,
 };

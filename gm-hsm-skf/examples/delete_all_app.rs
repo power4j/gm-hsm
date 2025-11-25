@@ -1,5 +1,5 @@
-use skf_rs::helper::auth::encrypt_auth_key_sm1_ecb;
-use skf_rs::{Engine, LibLoader};
+use gm_hsm_skf::helper::auth::encrypt_auth_key_sm1_ecb;
+use gm_hsm_skf::{Engine, LibLoader};
 
 pub const AUTH_KEY: [u8; 16] = [
     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,

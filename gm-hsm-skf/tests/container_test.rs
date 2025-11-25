@@ -1,9 +1,9 @@
 #[allow(dead_code)]
 mod common;
 
+use gm_hsm_skf::spec::algorithm::SGD_SM4_ECB;
+use gm_hsm_skf::EnvelopedKeyData;
 use gm_hsm_sys::skf::types::ECCPublicKeyBlob;
-use skf_rs::spec::algorithm::SGD_SM4_ECB;
-use skf_rs::EnvelopedKeyData;
 
 use crate::common::{
     describe_result, get_or_create_test_container_1, SK_INITIATOR_ID, SK_RESPONDER_ID,

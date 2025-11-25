@@ -5,7 +5,7 @@ use crate::common::{
     describe_result, get_or_create_test_app_1, verify_admin_pin, verify_user_pin, TEST_ADMIN_PIN,
     TEST_FILE_NAME_1, TEST_USER_PIN,
 };
-use skf_rs::{FileAttr, FILE_PERM_EVERYONE, PIN_TYPE_USER};
+use gm_hsm_skf::{FileAttr, FILE_PERM_EVERYONE, PIN_TYPE_USER};
 
 #[test]
 #[ignore]

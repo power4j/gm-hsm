@@ -1,4 +1,4 @@
-use skf_rs::{Engine, LibLoader};
+use gm_hsm_skf::{Engine, LibLoader};
 
 fn main() {
     let engine = Engine::new(LibLoader::env_lookup().unwrap());

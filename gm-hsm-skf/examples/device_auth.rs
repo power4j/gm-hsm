@@ -1,5 +1,5 @@
-use skf_rs::helper::auth::encrypt_auth_key_sm1_ecb;
-use skf_rs::{Engine, LibLoader};
+use gm_hsm_skf::helper::auth::encrypt_auth_key_sm1_ecb;
+use gm_hsm_skf::{Engine, LibLoader};
 
 fn main() {
     let engine = Engine::new(LibLoader::env_lookup().unwrap());
