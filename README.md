@@ -1,18 +1,17 @@
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/power4j/skf-rs/CI.yml)
-[![crates.io version badge](https://img.shields.io/crates/v/skf-api?label=skf-api)](https://crates.io/crates/skf-api)
-[![crates.io version badge](https://img.shields.io/crates/v/skf-rs?label=skf-rs)](https://crates.io/crates/skf-rs)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/power4j/gm-hsm/CI.yml)
+[![crates.io version badge](https://img.shields.io/crates/v/gm-hsm-sys?label=gm-hsm-sys)](https://crates.io/crates/gm-hsm-sys)
+[![crates.io version badge](https://img.shields.io/crates/v/gm-hsm-skf?label=gm-hsm-skf)](https://crates.io/crates/gm-hsm-skf)
 
+> This project is a rewrite of the [skf-rs](https://github.com/power4j/skf-rs) project to support more types of
+> cryptographic devices.
 
-# Rust crates for GM/T 0016-2012 (Smart token cryptography application interface specification)
+- `gm-hsm-sys`: FFI Types for cryptography device application interface specification.
+- `gm-hsm-skf`: Rust wrapper for GM/T 0016-2012(Smart token cryptography application interface specification).
 
-- `skf-api`: FFI Types for GM/T 0016-2012.
-- `skf-rs`: Rust wrapper for vendor library.
+![gm-key](doc/img/gm-key.jpg)
 
-
-![gm-key](https://github.com/power4j/skf-rs/blob/main/doc/img/gm-key.jpg)
-          
 ## License
 
 This project is licensed under the [MIT license].
 
-[MIT license]: https://github.com/power4j/skf-rs/blob/master/LICENSE
+[MIT license]: https://github.com/power4j/gm-hsm/blob/master/LICENSE
