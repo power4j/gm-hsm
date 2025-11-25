@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main,master,develop,dev]
+    branches: [ main,master,develop,dev ]
   pull_request:
-    branches: [main,master,develop,dev]
+    branches: [ main,master,develop,dev ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -66,6 +66,6 @@ jobs:
       - uses: actions/checkout@v5
       - name: Check that it will publish to crates
         run: |
-          cargo publish --no-verify --dry-run -p skf-api
-          cargo publish --no-verify --dry-run -p skf-rs
+          cargo publish --no-verify --dry-run -p gm-hsm-sys
+          cargo publish --no-verify --dry-run -p gm-hsm-skf
         shell: bash
