@@ -16,4 +16,7 @@ keywords = ["GM", "cryptography", "PKI"]
 categories = ["hardware-support"]
 
 [features]
+default = []
+all = ["skf", "sdf"]
 skf = []
+sdf = []

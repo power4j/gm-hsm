@@ -1,0 +1,26 @@
+[package]
+name = "gm-hsm-sdf"
+version = "0.1.0"
+edition = "2021"
+authors = [
+    "CJ <power4j@outlook.com>",
+]
+description = """
+Rust wrapper for GM/T 0018-2012 (Interface specifications of cryptography device application).
+"""
+readme = "README.md"
+documentation = "https://docs.rs/gm-hsm-sdf"
+repository = "https://github.com/power4j/gm-hsm"
+license = "MIT"
+keywords = ["GM", "cryptography", "PKI"]
+categories = ["hardware-support"]
+
+[dependencies]
+gm-hsm-sys = { path = "../gm-hsm-sys", version = "0.1.2", features = ["sdf"] }
+tracing = "0.1"
+thiserror = "2"
+anyhow = "1"
+libloading = "0.8"
+
+[dev-dependencies]
+hex = "0.4"

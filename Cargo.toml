@@ -2,5 +2,6 @@
 resolver = "2"
 members = [
     "gm-hsm-sys",
-    "gm-hsm-skf"
+    "gm-hsm-skf",
+    "gm-hsm-sdf"
 ]
