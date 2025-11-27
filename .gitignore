@@ -52,6 +52,10 @@ Cargo.lock
 # ci dist
 /dist
 
+# Temporary files
+tmp/
+temp/
+
 ### others ###
 /logs
 *.log
@@ -63,3 +67,4 @@ Cargo.lock
 openspec/
 AGENTS.md
 CLAUDE.md
+.mcp.json
