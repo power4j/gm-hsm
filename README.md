@@ -8,8 +8,6 @@
 - `gm-hsm-sys`: FFI Types for cryptography device application interface specification.
 - `gm-hsm-skf`: Rust wrapper for GM/T 0016-2012(Smart token cryptography application interface specification).
 
-![gm-key](doc/img/gm-key.jpg)
-
 ## License
 
 This project is licensed under the [MIT license].

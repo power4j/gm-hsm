@@ -1,14 +1,16 @@
-[![crates.io version badge](https://img.shields.io/crates/v/skf-rs?label=skf-rs)](https://crates.io/crates/gm-hsm-skf)
+[![crates.io version badge](https://img.shields.io/crates/v/gm_hsm_skf?label=gm_hsm_skf)](https://crates.io/crates/gm-hsm-skf)
 [![Documentation](https://docs.rs/gm-hsm-skf/badge.svg)](https://docs.rs/gm-hsm-skf)
 
 Rust wrapper for GM/T 0016-2012(Smart token cryptography application interface specification).
+
+![gm-key](doc/img/gm-key.jpg)
 
 # Usage
 
 Listing available device:
 
 ```rust
-use skf_rs::{Engine, LibLoader};
+use gm_hsm_skf::{Engine, LibLoader};
 
 fn main() {
     let engine = Engine::new(LibLoader::env_lookup().unwrap());
