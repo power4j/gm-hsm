@@ -5,8 +5,9 @@
 > This project is a rewrite of the [skf-rs](https://github.com/power4j/skf-rs) project to support more types of
 > cryptographic devices.
 
-- `gm-hsm-sys`: FFI Types for cryptography device application interface specification.
-- `gm-hsm-skf`: Rust wrapper for GM/T 0016-2012(Smart token cryptography application interface specification).
+- `gm-hsm-sys`: FFI Types for `gm-hsm-skf`,`gm-hsm-sdf`.
+- `gm-hsm-skf`: Rust wrapper for `GM/T 0016-2012` (Smart token cryptography application interface specification).
+- `gm-hsm-sdf`: Rust wrapper for `GM/T 0018-2012` (Interface specifications of cryptography device application).
 
 ## License
 
