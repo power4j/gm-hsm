@@ -1,6 +1,8 @@
-use crate::engine::symbol::{crypto_fn, ModBlockCipher, SymbolBundle};
+use crate::engine::symbol::ModBlockCipher;
 use crate::error::{InvalidArgumentError, SkfErr};
 use crate::{BlockCipherParameter, Error, ManagedKey, Result, SkfBlockCipher};
+use gm_hsm_sys::dll::skf;
+use gm_hsm_sys::dll::symbol::SymbolBundle;
 use gm_hsm_sys::sgd::types::{BYTE, HANDLE, ULONG};
 use gm_hsm_sys::skf::error::SAR_OK;
 use gm_hsm_sys::skf::types::{BlockCipherParam, MAX_IV_LEN};
@@ -9,7 +11,7 @@ use std::sync::Arc;
 use tracing::{instrument, trace};
 
 pub(crate) struct ManagedKeyImpl {
-    close_fn: crypto_fn::SKF_CloseHandle,
+    close_fn: skf::SKF_CloseHandle,
     handle: HANDLE,
 }
 impl Debug for ManagedKeyImpl {

@@ -1,150 +1,15 @@
-use libloading::{Library, Symbol};
+use gm_hsm_sys::dll::skf;
+use gm_hsm_sys::dll::symbol::SymbolBundle;
+use libloading::Library;
 use std::sync::Arc;
-
-/// Helper macro to define extern function type for each platform
-#[macro_export]
-macro_rules! define_extern_fn_type {
-    ($vis:vis $name:ident = fn($($arg:ty),*) -> $ret:ty) => {
-        #[cfg(all(target_os = "windows", target_arch = "x86"))]
-        $vis type $name = $crate::engine::symbol::SymbolBundle<unsafe extern "stdcall" fn($($arg),*) -> $ret>;
-
-        #[cfg(not(all(target_os = "windows", target_arch = "x86")))]
-        $vis type $name = $crate::engine::symbol::SymbolBundle<unsafe extern "C" fn($($arg),*) -> $ret>;
-    };
-}
-
-/// Symbol bundle with library pointer
-pub struct SymbolBundle<T: 'static> {
-    _lib: Arc<Library>,
-    symbol: Symbol<'static, T>,
-}
-impl<T> SymbolBundle<T> {
-    /// Get a pointer to a function or static variable by symbol name.
-    pub unsafe fn new(
-        lib: &Arc<Library>,
-        sym: &[u8],
-    ) -> Result<SymbolBundle<T>, libloading::Error> {
-        let lc = lib.clone();
-        unsafe {
-            let symbol: Symbol<T> = lib.get(sym)?;
-            let bundle = SymbolBundle {
-                _lib: lc,
-                symbol: std::mem::transmute(symbol),
-            };
-            Ok(bundle)
-        }
-    }
-}
-impl<T> std::ops::Deref for SymbolBundle<T> {
-    type Target = Symbol<'static, T>;
-    fn deref(&self) -> &Self::Target {
-        &self.symbol
-    }
-}
-
-#[allow(non_camel_case_types)]
-pub(crate) mod device_fn {
-    use crate::define_extern_fn_type;
-    use gm_hsm_sys::sgd::types::{BOOL, BYTE, CHAR, DWORD, HANDLE, LPSTR, ULONG};
-    use gm_hsm_sys::skf::types::DeviceInfo;
-
-    define_extern_fn_type!(pub(super) SKF_WaitForDevEvent = fn(*mut CHAR, *mut ULONG, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_CancelWaitForDevEvent = fn() -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_EnumDev = fn(BOOL, *mut CHAR, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GetDevState = fn(*const CHAR, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ConnectDev = fn(*const CHAR, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DisConnectDev = fn(HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_SetLabel = fn(HANDLE, *const CHAR) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GetDevInfo = fn(HANDLE, *mut DeviceInfo) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_LockDev = fn(HANDLE, ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_UnlockDev = fn(HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_Transmit = fn(HANDLE, *const BYTE, ULONG, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ChangeDevAuthKey = fn(HANDLE, *const BYTE, ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DevAuth = fn(HANDLE, *const BYTE, ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_CreateApplication = fn(HANDLE, LPSTR, LPSTR, DWORD, LPSTR, DWORD, DWORD, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_OpenApplication = fn(HANDLE, LPSTR, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DeleteApplication = fn(HANDLE, LPSTR) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_EnumApplication = fn(HANDLE, *mut CHAR, *mut ULONG) -> ULONG);
-}
-
-#[allow(non_camel_case_types)]
-pub(crate) mod app_fn {
-    use crate::define_extern_fn_type;
-    use gm_hsm_sys::sgd::types::{BOOL, BYTE, CHAR, HANDLE, LPSTR, ULONG};
-    use gm_hsm_sys::skf::types::FileAttribute;
-
-    define_extern_fn_type!(pub(super) SKF_CloseApplication = fn(HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ClearSecureState = fn(HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_EnumFiles = fn(HANDLE, *mut CHAR, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_CreateFile = fn(HANDLE, LPSTR, ULONG, ULONG, ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DeleteFile = fn(HANDLE, LPSTR) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GetFileInfo = fn(HANDLE, LPSTR, *mut FileAttribute) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ReadFile = fn(HANDLE, LPSTR, ULONG, ULONG, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_WriteFile = fn(HANDLE, LPSTR, ULONG, *const BYTE, ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ChangePIN = fn(HANDLE, ULONG, LPSTR, LPSTR, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GetPINInfo = fn(HANDLE, ULONG, *mut ULONG, *mut ULONG, *mut BOOL) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_VerifyPIN = fn(HANDLE, ULONG, LPSTR, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_UnblockPIN = fn(HANDLE, LPSTR, LPSTR, *mut ULONG) -> ULONG);
-}
-
-#[allow(non_camel_case_types)]
-pub(crate) mod container_fn {
-    use crate::define_extern_fn_type;
-    use gm_hsm_sys::sgd::types::{BOOL, BYTE, CHAR, HANDLE, LPSTR, ULONG};
-
-    define_extern_fn_type!(pub(super) SKF_CreateContainer = fn(HANDLE, LPSTR, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DeleteContainer = fn(HANDLE, LPSTR) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_OpenContainer = fn(HANDLE, LPSTR, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_EnumContainer = fn(HANDLE, *mut CHAR, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_CloseContainer = fn(HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GetContainerType = fn(HANDLE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ImportCertificate = fn(HANDLE, BOOL, *const BYTE, ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ExportCertificate = fn(HANDLE, BOOL, *mut BYTE, *mut ULONG) -> ULONG);
-}
-
-#[allow(non_camel_case_types)]
-pub(crate) mod crypto_fn {
-    use crate::define_extern_fn_type;
-    use gm_hsm_sys::sgd::types::{BOOL, BYTE, HANDLE, ULONG};
-    use gm_hsm_sys::skf::types::{
-        BlockCipherParam, ECCCipherBlob, ECCPrivateKeyBlob, ECCPublicKeyBlob, ECCSignatureBlob,
-        EnvelopedKeyBlob,
-    };
-
-    define_extern_fn_type!(pub(crate) SKF_GenRandom = fn(HANDLE, *mut BYTE, ULONG) -> ULONG);
-    define_extern_fn_type!(pub(crate) SKF_CloseHandle = fn(HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_SetSymmKey = fn(HANDLE, *const BYTE, ULONG, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_EncryptInit = fn(HANDLE, BlockCipherParam) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_Encrypt = fn(HANDLE, *const BYTE, ULONG, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_EncryptUpdate = fn(HANDLE, *const BYTE, ULONG, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_EncryptFinal = fn(HANDLE, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DecryptInit = fn(HANDLE, BlockCipherParam) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_Decrypt = fn(HANDLE, *const BYTE, ULONG, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DecryptUpdate = fn(HANDLE, *const BYTE, ULONG, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_DecryptFinal = fn(HANDLE, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ExtECCEncrypt = fn(HANDLE, *const ECCPublicKeyBlob, *const BYTE, ULONG, *mut ECCCipherBlob) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ExtECCDecrypt = fn(HANDLE, *const ECCPrivateKeyBlob, *const ECCCipherBlob, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ExtECCSign = fn(HANDLE, *const ECCPrivateKeyBlob, *const BYTE, ULONG, *mut ECCSignatureBlob) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ExtECCVerify = fn(HANDLE, *const ECCPublicKeyBlob, *const BYTE, ULONG, *const ECCSignatureBlob) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GenECCKeyPair = fn(HANDLE, ULONG, *mut ECCPublicKeyBlob) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ImportECCKeyPair = fn(HANDLE, *const EnvelopedKeyBlob) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ECCSignData = fn(HANDLE, *const BYTE, ULONG, *mut ECCSignatureBlob) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ECCVerify = fn(HANDLE, *const ECCPublicKeyBlob, *const BYTE, ULONG, *const ECCSignatureBlob) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ECCExportSessionKey = fn(HANDLE, ULONG, *const ECCPublicKeyBlob, *mut ECCCipherBlob, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GenerateAgreementDataWithECC = fn(HANDLE, ULONG, *mut ECCPublicKeyBlob, *const BYTE, ULONG, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GenerateAgreementDataAndKeyWithECC = fn(HANDLE, ULONG, *const ECCPublicKeyBlob, *const ECCPublicKeyBlob, *mut ECCPublicKeyBlob, *const BYTE, ULONG, *const BYTE, ULONG, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ExportPublicKey = fn(HANDLE, BOOL, *mut BYTE, *mut ULONG) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_ImportSessionKey = fn(HANDLE, ULONG, *const BYTE, ULONG, *mut HANDLE) -> ULONG);
-    define_extern_fn_type!(pub(super) SKF_GenerateKeyWithECC = fn(HANDLE, *const ECCPublicKeyBlob, *const ECCPublicKeyBlob, *const BYTE, ULONG, *mut HANDLE) -> ULONG);
-}
 
 #[derive(Default)]
 pub(crate) struct ModMag {
-    pub enum_dev: Option<device_fn::SKF_EnumDev>,
-    pub wait_plug_event: Option<device_fn::SKF_WaitForDevEvent>,
-    pub cancel_wait_plug_event: Option<device_fn::SKF_CancelWaitForDevEvent>,
-    pub get_dev_state: Option<device_fn::SKF_GetDevState>,
-    pub connect_dev: Option<device_fn::SKF_ConnectDev>,
+    pub enum_dev: Option<skf::SKF_EnumDev>,
+    pub wait_plug_event: Option<skf::SKF_WaitForDevEvent>,
+    pub cancel_wait_plug_event: Option<skf::SKF_CancelWaitForDevEvent>,
+    pub get_dev_state: Option<skf::SKF_GetDevState>,
+    pub connect_dev: Option<skf::SKF_ConnectDev>,
 }
 
 impl ModMag {
@@ -168,26 +33,26 @@ impl ModMag {
 
 #[derive(Default)]
 pub(crate) struct ModDev {
-    pub dev_set_label: Option<device_fn::SKF_SetLabel>,
-    pub dev_dis_connect: Option<device_fn::SKF_DisConnectDev>,
-    pub dev_get_info: Option<device_fn::SKF_GetDevInfo>,
-    pub dev_lock: Option<device_fn::SKF_LockDev>,
-    pub dev_unlock: Option<device_fn::SKF_UnlockDev>,
-    pub dev_transmit: Option<device_fn::SKF_Transmit>,
-    pub dev_auth: Option<device_fn::SKF_DevAuth>,
-    pub dev_change_auth_key: Option<device_fn::SKF_ChangeDevAuthKey>,
-    pub app_create: Option<device_fn::SKF_CreateApplication>,
-    pub app_open: Option<device_fn::SKF_OpenApplication>,
-    pub app_delete: Option<device_fn::SKF_DeleteApplication>,
-    pub app_enum: Option<device_fn::SKF_EnumApplication>,
-    pub gen_random: Option<crypto_fn::SKF_GenRandom>,
-    pub sym_key_import: Option<crypto_fn::SKF_SetSymmKey>,
-    pub ecc_ext_encrypt: Option<crypto_fn::SKF_ExtECCEncrypt>,
-    pub ecc_ext_decrypt: Option<crypto_fn::SKF_ExtECCDecrypt>,
-    pub ecc_ext_sign: Option<crypto_fn::SKF_ExtECCSign>,
-    pub ecc_ext_verify: Option<crypto_fn::SKF_ExtECCVerify>,
-    pub ecc_verify: Option<crypto_fn::SKF_ECCVerify>,
-    pub ecc_gen_sk: Option<crypto_fn::SKF_GenerateKeyWithECC>,
+    pub dev_set_label: Option<skf::SKF_SetLabel>,
+    pub dev_dis_connect: Option<skf::SKF_DisConnectDev>,
+    pub dev_get_info: Option<skf::SKF_GetDevInfo>,
+    pub dev_lock: Option<skf::SKF_LockDev>,
+    pub dev_unlock: Option<skf::SKF_UnlockDev>,
+    pub dev_transmit: Option<skf::SKF_Transmit>,
+    pub dev_auth: Option<skf::SKF_DevAuth>,
+    pub dev_change_auth_key: Option<skf::SKF_ChangeDevAuthKey>,
+    pub app_create: Option<skf::SKF_CreateApplication>,
+    pub app_open: Option<skf::SKF_OpenApplication>,
+    pub app_delete: Option<skf::SKF_DeleteApplication>,
+    pub app_enum: Option<skf::SKF_EnumApplication>,
+    pub gen_random: Option<skf::SKF_GenRandom>,
+    pub sym_key_import: Option<skf::SKF_SetSymmKey>,
+    pub ecc_ext_encrypt: Option<skf::SKF_ExtECCEncrypt>,
+    pub ecc_ext_decrypt: Option<skf::SKF_ExtECCDecrypt>,
+    pub ecc_ext_sign: Option<skf::SKF_ExtECCSign>,
+    pub ecc_ext_verify: Option<skf::SKF_ExtECCVerify>,
+    pub ecc_verify: Option<skf::SKF_ECCVerify>,
+    pub ecc_gen_sk: Option<skf::SKF_GenerateKeyWithECC>,
 }
 
 impl ModDev {
@@ -242,22 +107,22 @@ impl ModDev {
 
 #[derive(Default)]
 pub(crate) struct ModApp {
-    pub app_close: Option<app_fn::SKF_CloseApplication>,
-    pub app_clear_secure_state: Option<app_fn::SKF_ClearSecureState>,
-    pub file_get_list: Option<app_fn::SKF_EnumFiles>,
-    pub file_create: Option<app_fn::SKF_CreateFile>,
-    pub file_delete: Option<app_fn::SKF_DeleteFile>,
-    pub file_get_info: Option<app_fn::SKF_GetFileInfo>,
-    pub file_read: Option<app_fn::SKF_ReadFile>,
-    pub file_write: Option<app_fn::SKF_WriteFile>,
-    pub container_get_list: Option<container_fn::SKF_EnumContainer>,
-    pub container_create: Option<container_fn::SKF_CreateContainer>,
-    pub container_delete: Option<container_fn::SKF_DeleteContainer>,
-    pub container_open: Option<container_fn::SKF_OpenContainer>,
-    pub pin_change: Option<app_fn::SKF_ChangePIN>,
-    pub pin_get_info: Option<app_fn::SKF_GetPINInfo>,
-    pub pin_verify: Option<app_fn::SKF_VerifyPIN>,
-    pub pin_unblock: Option<app_fn::SKF_UnblockPIN>,
+    pub app_close: Option<skf::SKF_CloseApplication>,
+    pub app_clear_secure_state: Option<skf::SKF_ClearSecureState>,
+    pub file_get_list: Option<skf::SKF_EnumFiles>,
+    pub file_create: Option<skf::SKF_CreateFile>,
+    pub file_delete: Option<skf::SKF_DeleteFile>,
+    pub file_get_info: Option<skf::SKF_GetFileInfo>,
+    pub file_read: Option<skf::SKF_ReadFile>,
+    pub file_write: Option<skf::SKF_WriteFile>,
+    pub container_get_list: Option<skf::SKF_EnumContainer>,
+    pub container_create: Option<skf::SKF_CreateContainer>,
+    pub container_delete: Option<skf::SKF_DeleteContainer>,
+    pub container_open: Option<skf::SKF_OpenContainer>,
+    pub pin_change: Option<skf::SKF_ChangePIN>,
+    pub pin_get_info: Option<skf::SKF_GetPINInfo>,
+    pub pin_verify: Option<skf::SKF_VerifyPIN>,
+    pub pin_unblock: Option<skf::SKF_UnblockPIN>,
 }
 
 impl ModApp {
@@ -305,18 +170,18 @@ impl ModApp {
 
 #[derive(Default)]
 pub(crate) struct ModContainer {
-    pub ct_close: Option<container_fn::SKF_CloseContainer>,
-    pub ct_get_type: Option<container_fn::SKF_GetContainerType>,
-    pub ct_imp_cert: Option<container_fn::SKF_ImportCertificate>,
-    pub ct_exp_cert: Option<container_fn::SKF_ExportCertificate>,
-    pub ct_ecc_gen_pair: Option<crypto_fn::SKF_GenECCKeyPair>,
-    pub ct_ecc_imp_pair: Option<crypto_fn::SKF_ImportECCKeyPair>,
-    pub ct_ecc_sign: Option<crypto_fn::SKF_ECCSignData>,
-    pub ct_sk_gen_agreement: Option<crypto_fn::SKF_GenerateAgreementDataWithECC>,
-    pub ct_sk_gen_agreement_and_key: Option<crypto_fn::SKF_GenerateAgreementDataAndKeyWithECC>,
-    pub ct_ecc_exp_pub_key: Option<crypto_fn::SKF_ExportPublicKey>,
-    pub ct_sk_imp: Option<crypto_fn::SKF_ImportSessionKey>,
-    pub ct_sk_exp: Option<crypto_fn::SKF_ECCExportSessionKey>,
+    pub ct_close: Option<skf::SKF_CloseContainer>,
+    pub ct_get_type: Option<skf::SKF_GetContainerType>,
+    pub ct_imp_cert: Option<skf::SKF_ImportCertificate>,
+    pub ct_exp_cert: Option<skf::SKF_ExportCertificate>,
+    pub ct_ecc_gen_pair: Option<skf::SKF_GenECCKeyPair>,
+    pub ct_ecc_imp_pair: Option<skf::SKF_ImportECCKeyPair>,
+    pub ct_ecc_sign: Option<skf::SKF_ECCSignData>,
+    pub ct_sk_gen_agreement: Option<skf::SKF_GenerateAgreementDataWithECC>,
+    pub ct_sk_gen_agreement_and_key: Option<skf::SKF_GenerateAgreementDataAndKeyWithECC>,
+    pub ct_ecc_exp_pub_key: Option<skf::SKF_ExportPublicKey>,
+    pub ct_sk_imp: Option<skf::SKF_ImportSessionKey>,
+    pub ct_sk_exp: Option<skf::SKF_ECCExportSessionKey>,
 }
 
 impl ModContainer {
@@ -355,14 +220,14 @@ impl ModContainer {
 
 #[derive(Default)]
 pub(crate) struct ModBlockCipher {
-    pub encrypt_init: Option<crypto_fn::SKF_EncryptInit>,
-    pub encrypt: Option<crypto_fn::SKF_Encrypt>,
-    pub encrypt_update: Option<crypto_fn::SKF_EncryptUpdate>,
-    pub encrypt_final: Option<crypto_fn::SKF_EncryptFinal>,
-    pub decrypt_init: Option<crypto_fn::SKF_DecryptInit>,
-    pub decrypt: Option<crypto_fn::SKF_Decrypt>,
-    pub decrypt_update: Option<crypto_fn::SKF_DecryptUpdate>,
-    pub decrypt_final: Option<crypto_fn::SKF_DecryptFinal>,
+    pub encrypt_init: Option<skf::SKF_EncryptInit>,
+    pub encrypt: Option<skf::SKF_Encrypt>,
+    pub encrypt_update: Option<skf::SKF_EncryptUpdate>,
+    pub encrypt_final: Option<skf::SKF_EncryptFinal>,
+    pub decrypt_init: Option<skf::SKF_DecryptInit>,
+    pub decrypt: Option<skf::SKF_Decrypt>,
+    pub decrypt_update: Option<skf::SKF_DecryptUpdate>,
+    pub decrypt_final: Option<skf::SKF_DecryptFinal>,
 }
 
 impl ModBlockCipher {
