@@ -73,7 +73,7 @@ impl ECCCipher {
     }
 }
 
-pub fn get_message(code: u32) -> Option<&'static str> {
+pub fn get_message(code: i32) -> Option<&'static str> {
     match code {
         crate::sdf::types::SDR_OK => Some("操作成功"),
         crate::sdf::types::SDR_UNKNOWERR => Some("未知错误"),
