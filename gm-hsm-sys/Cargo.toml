@@ -17,6 +17,13 @@ categories = ["hardware-support"]
 
 [features]
 default = []
-all = ["skf", "sdf"]
+all = ["skf", "sdf", "dll"]
+# skf ffi
 skf = []
+# sdf ffi
 sdf = []
+#  dynamic link libraries support
+dll = ["libloading"]
+
+[dependencies]
+libloading = { version = "0.8", optional = true }

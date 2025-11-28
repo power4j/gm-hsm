@@ -1,3 +1,5 @@
+#[cfg(feature = "dll")]
+pub mod dll;
 #[cfg(feature = "sdf")]
 pub mod sdf;
 pub mod sgd;
