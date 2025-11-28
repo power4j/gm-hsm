@@ -4,6 +4,8 @@ use std::fmt::{Debug, Display, Formatter};
 pub enum Error {
     #[error(transparent)]
     InvalidArgument(#[from] InvalidArgumentError),
+    #[error("Illegal state: {0}")]
+    IllegalState(String),
     #[error(transparent)]
     LibLoading(#[from] libloading::Error),
     #[error(transparent)]
@@ -36,19 +38,19 @@ impl Display for InvalidArgumentError {
 
 #[derive(Clone)]
 pub struct SdfErr {
-    pub code: u32,
+    pub code: i32,
     pub message: String,
 }
 
 impl SdfErr {
-    pub fn new(code: u32, message: impl AsRef<str>) -> Self {
+    pub fn new(code: i32, message: impl AsRef<str>) -> Self {
         Self {
             code,
             message: message.as_ref().to_string(),
         }
     }
 
-    pub fn of_code(code: u32) -> Self {
+    pub fn of_code(code: i32) -> Self {
         let message = get_message(code).unwrap_or("Unknown error");
         Self::new(code, message)
     }
