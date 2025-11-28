@@ -1,3 +1,4 @@
+pub mod sdf;
 pub mod skf;
 
 pub mod symbol {
@@ -72,6 +73,7 @@ pub mod symbol {
 }
 
     /// Symbol bundle with library pointer
+    #[derive(Clone)]
     pub struct SymbolBundle<T: 'static> {
         _lib: Arc<Library>,
         symbol: Symbol<'static, T>,
