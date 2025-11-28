@@ -1,6 +1,56 @@
 use std::cmp::min;
 use std::ffi::CStr;
+use std::marker::PhantomData;
 use std::slice;
+
+/// Raw pointer to a C structure or handle.
+pub type RawPtr = *mut ::std::os::raw::c_void;
+
+/// Represents an opaque C structure or handle (e.g., a cryptographic session or context).
+///
+/// **Usage Note:** This type is never instantiated in Rust; it is only used by reference
+/// via a raw pointer (*mut RawHandle) to ensure type safety when interacting with FFI.
+///
+/// **Design Rationale:**
+/// - `#[repr(C)]` ensures compatibility with C linking.
+/// - `_private: [u8; 0]` makes the type opaque, preventing Rust from knowing its layout or size.
+#[repr(C)]
+pub struct RawHandle {
+    _private: [u8; 0],
+}
+pub type RawHandlePtr = *mut RawHandle;
+
+/// A safe, thread-safe wrapper for the FFI opaque handle (*mut RawHandle).
+///
+/// This struct takes ownership of the C resource but, in this implementation,
+/// delegates resource cleanup responsibility to the caller.
+///
+/// **CRITICAL NOTE ON RESOURCE MANAGEMENT (DROP):**
+/// This wrapper **does NOT** implement the `Drop` trait and therefore **does NOT**
+/// automatically call the C library's release function (e.g., `SDF_CloseSession`).
+///
+/// **Recommendation:** If this handle owns a C resource that requires cleanup:
+/// 1. You **MUST** define your own owning structure, embed this handle within it,
+///    and implement the `Drop` trait to ensure the C resource is freed.
+/// 2. Alternatively, you must manually call the C release function (less safe, prone to leaks).
+pub struct ThreadSafeHandle {
+    /// The raw pointer to the C resource.
+    ///
+    /// **Choice Rationale (*mut):** We use `*mut` (mutable) because C library functions often
+    /// internally modify the resource's state (e.g., update counters, caches, or locks).
+    pub ptr: RawHandlePtr,
+
+    /// Marker to inform the compiler about ownership and thread-safety.
+    _marker: PhantomData<()>,
+}
+
+/// **Safety Note (Send):** We implement `Send` because we are asserting that the underlying
+/// C resource (pointed to by `ptr`) can be safely moved/transferred from one thread to another.
+unsafe impl Send for ThreadSafeHandle {}
+
+/// **Safety Note (Sync):** We implement `Sync` because we are asserting that the underlying
+/// C resource can be safely accessed *concurrently* by multiple threads.
+unsafe impl Sync for ThreadSafeHandle {}
 
 /// Returns the position of the first null byte
 ///
