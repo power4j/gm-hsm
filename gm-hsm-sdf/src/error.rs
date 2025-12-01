@@ -55,6 +55,12 @@ impl SdfErr {
         Self::new(code, message)
     }
 }
+impl From<i32> for SdfErr {
+    fn from(value: i32) -> Self {
+        Self::of_code(value)
+    }
+}
+
 impl std::error::Error for SdfErr {}
 
 impl Display for SdfErr {

@@ -1,4 +1,3 @@
-use gm_hsm_sys::define_symbol;
 use gm_hsm_sys::dll::sdf;
 use gm_hsm_sys::dll::symbol::SymbolBundle;
 use libloading::Library;
