@@ -11,6 +11,10 @@ on:
         description: "gm-hsm-skf: major/minor/patch or semver or none if not updating derive crate"
         required: false
         default: "none"
+      gm-hsm-sdf-version:
+        description: "gm-hsm-sdf: major/minor/patch or semver or none if not updating derive crate"
+        required: false
+        default: "none"
 
 #permissions:                    # Global permissions configuration starts here
 #  contents: read                # 'read' access to repository contents
@@ -91,3 +95,28 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN  }}
         run: cargo publish --no-verify -p gm-hsm-skf
+
+
+      - name: "[gm-hsm-sdf] Bump"
+        if: "${{ github.event.inputs.gm-hsm-sdf-version == 'major' || github.event.inputs.gm-hsm-sdf-version == 'minor' || github.event.inputs.gm-hsm-sdf-version == 'patch' }}"
+        #working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          cargo set-version --bump ${{ github.event.inputs.gm-hsm-sdf-version}} -p gm-hsm-sdf
+          CRATE_TAG="$(cd gm-hsm-sdf && cargo get package.name)-$(cd gm-hsm-sdf && cargo get package.version --pretty)"
+          git add .
+          git commit -am "Release: $CRATE_TAG"
+          git tag "$CRATE_TAG"
+
+      - name: "[gm-hsm-sdf] Push"
+        uses: ad-m/github-push-action@master
+        if: "${{ github.event.inputs.gm-hsm-sdf-version == 'major' || github.event.inputs.gm-hsm-sdf-version == 'minor' || github.event.inputs.gm-hsm-sdf-version == 'patch' }}"
+        with:
+          branch: ${{ github.ref }}
+          tags: true
+
+      - name: "[gm-hsm-sdf] Publish"
+        if: "${{ github.event.inputs.gm-hsm-sdf-version == 'major' || github.event.inputs.gm-hsm-sdf-version == 'minor' || github.event.inputs.gm-hsm-sdf-version == 'patch' }}"
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN  }}
+        run: cargo publish --no-verify -p gm-hsm-sdf

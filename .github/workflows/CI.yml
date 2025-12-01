@@ -39,26 +39,56 @@ jobs:
   tests:
     needs: validity
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # Test minimal features (default)
+          - name: "default-features"
+            features: ""
+          # Test individual feature combinations that might have conflicts
+          - name: "skf-only"
+            features: "--features skf"
+          # Test SDF with its required dll feature
+          - name: "sdf-with-dll"
+            features: "--features sdf,dll"
+          # Test all features together
+          - name: "all-features"
+            features: "--all-features"
     steps:
       - uses: actions/checkout@v5
       - uses: actions/cache@v4
         with:
           path: ${{ env.CACHE_PATHS }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Run all tests
-        run: cargo test --workspace --verbose --all-features
+      - name: Run tests (${{ matrix.name }})
+        run: cargo test --workspace --verbose ${{ matrix.features }}
 
   clippy:
     needs: validity
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # Test minimal features (default)
+          - name: "default-features"
+            features: ""
+          # Test individual feature combinations that might have conflicts
+          - name: "skf-only"
+            features: "--features skf"
+          # Test SDF with its required dll feature
+          - name: "sdf-with-dll"
+            features: "--features sdf,dll"
+          # Test all features together
+          - name: "all-features"
+            features: "--all-features"
     steps:
       - uses: actions/checkout@v5
       - uses: actions/cache@v4
         with:
           path: ${{ env.CACHE_PATHS }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Lint code with clippy
-        run: cargo clippy
+      - name: Lint code with clippy (${{ matrix.name }})
+        run: cargo clippy --workspace --all-targets ${{ matrix.features }}
 
   publish-ability:
     runs-on: ubuntu-latest
@@ -68,4 +98,5 @@ jobs:
         run: |
           cargo publish --no-verify --dry-run -p gm-hsm-sys
           cargo publish --no-verify --dry-run -p gm-hsm-skf
+          cargo publish --no-verify --dry-run -p gm-hsm-sdf
         shell: bash
