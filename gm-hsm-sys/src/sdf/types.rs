@@ -268,8 +268,10 @@ const _: () = {
         [::std::mem::offset_of!(EnvelopedKeyBlob_st, ECCCipehrBlob) - (ULONG_SIZE * 2)];
     ["Offset of field: EnvelopedKeyBlob_st::PubKey"]
         [::std::mem::offset_of!(EnvelopedKeyBlob_st, PubKey) - (ULONG_SIZE * 2 + 165)];
-    ["Offset of field: EnvelopedKeyBlob_st::cbEncryptedPrivKey"]
-        [::std::mem::offset_of!(EnvelopedKeyBlob_st, cbEncryptedPrivKey) - (ULONG_SIZE * 2 + 165 + 132)];
+    ["Offset of field: EnvelopedKeyBlob_st::cbEncryptedPrivKey"][::std::mem::offset_of!(
+        EnvelopedKeyBlob_st,
+        cbEncryptedPrivKey
+    ) - (ULONG_SIZE * 2 + 165 + 132)];
 };
 pub type EnvelopedKeyBlob = EnvelopedKeyBlob_st;
 pub type PEnvelopedKeyBlob = *mut EnvelopedKeyBlob_st;
