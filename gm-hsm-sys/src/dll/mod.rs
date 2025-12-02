@@ -21,6 +21,7 @@ pub mod symbol {
     ///
     /// # Examples
     /// ```rust
+    /// use gm_hsm_sys::define_extern_fn;
     /// define_extern_fn!(pub Win32GetProcAddress = fn(isize, *const u8) -> isize);
     /// // Win32GetProcAddress is now an alias for the correct unsafe extern "..." fn(...) type.
     ///
@@ -52,6 +53,7 @@ pub mod symbol {
     ///
     /// # Example Usage:
     /// ```rust
+    /// use gm_hsm_sys::define_symbol;
     /// define_symbol!(FnWin32GetProcAddress, Win32GetProcAddress, pub(crate) fn(isize, *const u8) -> isize);
     ///
     /// // Expands (e.g., on Windows x64) to:
