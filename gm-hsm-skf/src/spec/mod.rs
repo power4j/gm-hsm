@@ -45,10 +45,8 @@ pub mod algorithm {
     pub const SGD_SM2: u32 = 0x00020100;
 
     /// SM2 ECC(Sign)
-
     pub const SGD_SM2_1: u32 = 0x00020200;
     /// SM2 ECC(key exchange)
-
     pub const SGD_SM2_2: u32 = 0x00020400;
 
     /// SM2 ECC(encryption)

@@ -1,7 +1,13 @@
+#![allow(clippy::missing_safety_doc)]
+#![allow(clippy::manual_c_str_literals)]
+
 use std::cmp::min;
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::slice;
+
+// Allow missing safety documentation for unsafe functions in this module
+// since these are internal utility functions with well-defined safety contracts
 
 /// Raw pointer to a C structure or handle.
 pub type RawPtr = *mut ::std::os::raw::c_void;
@@ -116,10 +122,10 @@ pub const unsafe fn first_two_null_byte(ptr: *const u8, len: usize) -> Option<us
 /// use gm_hsm_sys::utils::mem::parse_cstr;
 /// let ptr = b"Hello\0World\0".as_ptr();
 /// unsafe {
-///     assert_eq!(Some(CStr::from_bytes_with_nul(b"Hello\0").unwrap()), parse_cstr(ptr, 12));
-///     assert_eq!(Some(CStr::from_bytes_with_nul(b"lo\0").unwrap()), parse_cstr(ptr.add(3), 12));
-///     assert_eq!(Some(CStr::from_bytes_with_nul(b"World\0").unwrap()), parse_cstr(ptr.add(6), 12));
-///     assert_eq!(Some(CStr::from_bytes_with_nul(b"\0").unwrap()), parse_cstr(ptr.add(5), 1));
+///     assert_eq!(Some(CStr::from_ptr(c"Hello\0".as_ptr())), parse_cstr(ptr, 12));
+///     assert_eq!(Some(CStr::from_ptr(c"lo\0".as_ptr())), parse_cstr(ptr.add(3), 12));
+///     assert_eq!(Some(CStr::from_ptr(c"World\0".as_ptr())), parse_cstr(ptr.add(6), 12));
+///     assert_eq!(Some(CStr::from_ptr(c"\0".as_ptr())), parse_cstr(ptr.add(5), 1));
 ///     assert_eq!(None, parse_cstr(ptr, 1));
 /// }
 /// ```
@@ -152,15 +158,15 @@ pub unsafe fn parse_cstr_lossy(ptr: *const u8, len: usize) -> Option<String> {
 /// use gm_hsm_sys::utils::mem::parse_cstr_list;
 /// unsafe {
 ///     let list = parse_cstr_list(b"Hello\0World\0\0".as_ptr(), 13);
-///     assert_eq!(CStr::from_bytes_with_nul(b"Hello\0").unwrap(), *list.get(0).unwrap());
-///     assert_eq!(CStr::from_bytes_with_nul(b"World\0").unwrap(), *list.get(1).unwrap());
+///     assert_eq!(CStr::from_ptr(c"Hello\0".as_ptr()), *list.get(0).unwrap());
+///     assert_eq!(CStr::from_ptr(c"World\0".as_ptr()), *list.get(1).unwrap());
 ///
 ///     let list = parse_cstr_list(b"Hello\0World\0".as_ptr(), 12);
-///     assert_eq!(CStr::from_bytes_with_nul(b"Hello\0").unwrap(), *list.get(0).unwrap());
-///     assert_eq!(CStr::from_bytes_with_nul(b"World\0").unwrap(), *list.get(1).unwrap());
+///     assert_eq!(CStr::from_ptr(c"Hello\0".as_ptr()), *list.get(0).unwrap());
+///     assert_eq!(CStr::from_ptr(c"World\0".as_ptr()), *list.get(1).unwrap());
 ///
 ///     let list = parse_cstr_list(b"Hello\0World".as_ptr(), 11);
-///     assert_eq!(CStr::from_bytes_with_nul(b"Hello\0").unwrap(), *list.get(0).unwrap());
+///     assert_eq!(CStr::from_ptr(c"Hello\0".as_ptr()), *list.get(0).unwrap());
 ///
 ///     let list = parse_cstr_list(b"Hello".as_ptr(), 5);
 ///     assert!(list.is_empty());
@@ -251,6 +257,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(clippy::manual_c_str_literals)]
     fn parse_terminated_cstr_list_test() {
         unsafe {
             let list = parse_cstr_list(b"Hello\0\0".as_ptr(), 7);
@@ -258,11 +265,11 @@ mod tests {
 
             let list = parse_cstr_list(b"Hello\0World\0\0".as_ptr(), 13);
             assert_eq!(
-                CStr::from_bytes_with_nul(b"Hello\0").unwrap(),
+                c"Hello",
                 *list.first().unwrap()
             );
             assert_eq!(
-                CStr::from_bytes_with_nul(b"World\0").unwrap(),
+                c"World",
                 *list.get(1).unwrap()
             );
         }

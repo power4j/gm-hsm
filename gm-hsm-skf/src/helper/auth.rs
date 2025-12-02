@@ -27,7 +27,7 @@ pub fn encrypt_auth_key_sm1_ecb(device: &dyn SkfDevice, key: &[u8]) -> Result<Ve
     let crypto = device.block_cipher()?;
     let mut data = device.gen_random(8)?;
     if data.len() < block_size {
-        data.extend(std::iter::repeat(0).take(block_size - data.len()));
+        data.extend(std::iter::repeat_n(0, block_size - data.len()));
     }
     let param = BlockCipherParameter {
         iv: vec![],

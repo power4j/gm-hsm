@@ -7,15 +7,15 @@
 /// Original C struct
 /// ```c
 /// typedef struct DeviceInfo_st {
-/// 	unsigned char IssuerName[40];
-/// 	unsigned char DeviceName[16];
-/// 	unsigned char DeviceSerial[16];
-/// 	unsigned int DeviceVersion;
-/// 	unsigned int StandardVersion;
-/// 	unsigned int AsymAlgAbility[2];
-/// 	unsigned int SymAlgAbility;
-/// 	unsigned int HashAlgAbility;
-/// 	unsigned int BufferSize;
+///     unsigned char IssuerName[40];
+///     unsigned char DeviceName[16];
+///     unsigned char DeviceSerial[16];
+///     unsigned int DeviceVersion;
+///     unsigned int StandardVersion;
+///     unsigned int AsymAlgAbility[2];
+///     unsigned int SymAlgAbility;
+///     unsigned int HashAlgAbility;
+///     unsigned int BufferSize;
 /// } DeviceInfo;
 /// ```
 #[repr(C, packed)]
@@ -59,9 +59,9 @@ pub type DeviceInfo = DeviceInfo_st;
 /// Original C struct
 /// ```c
 /// typedef struct RSArefPublicKey_st {
-/// 	unsigned int bits;
-/// 	unsigned char m[RSAref_MAX_LEN];
-/// 	unsigned char e[RSAref_MAX_LEN];
+///     unsigned int bits;
+///     unsigned char m[RSAref_MAX_LEN];
+///     unsigned char e[RSAref_MAX_LEN];
 /// } RSArefPublicKey;
 /// ```
 #[repr(C, packed)]
@@ -87,13 +87,13 @@ pub type RSArefPublicKey = RSArefPublicKey_st;
 /// Original C struct
 /// ```c
 /// typedef struct RSArefPrivateKey_st {
-/// 	unsigned int bits;
-/// 	unsigned char m[RSAref_MAX_LEN];
-/// 	unsigned char e[RSAref_MAX_LEN];
-/// 	unsigned char d[RSAref_MAX_LEN];
-/// 	unsigned char prime[2][RSAref_MAX_PLEN];
-/// 	unsigned char pexp[2][RSAref_MAX_PLEN];
-/// 	unsigned char coef[RSAref_MAX_PLEN];
+///     unsigned int bits;
+///     unsigned char m[RSAref_MAX_LEN];
+///     unsigned char e[RSAref_MAX_LEN];
+///     unsigned char d[RSAref_MAX_LEN];
+///     unsigned char prime[2][RSAref_MAX_PLEN];
+///     unsigned char pexp[2][RSAref_MAX_PLEN];
+///     unsigned char coef[RSAref_MAX_PLEN];
 /// } RSArefPrivateKey;
 /// ```
 #[repr(C, packed)]
@@ -131,9 +131,9 @@ pub type RSArefPrivateKey = RSArefPrivateKey_st;
 /// Original C struct
 /// ```c
 /// typedef struct ECCrefPublicKey_st {
-/// 	unsigned int bits;
-/// 	unsigned char x[ECCref_MAX_LEN];
-/// 	unsigned char y[ECCref_MAX_LEN];
+///     unsigned int bits;
+///     unsigned char x[ECCref_MAX_LEN];
+///     unsigned char y[ECCref_MAX_LEN];
 /// } ECCrefPublicKey;
 /// ```
 #[repr(C, packed)]
@@ -159,8 +159,8 @@ pub type ECCrefPublicKey = ECCrefPublicKey_st;
 /// Original C struct
 /// ```c
 /// typedef struct ECCrefPrivateKey_st {
-/// 	unsigned int bits;
-/// 	unsigned char K[ECCref_MAX_LEN];
+///     unsigned int bits;
+///     unsigned char K[ECCref_MAX_LEN];
 /// } ECCrefPrivateKey;
 /// ```
 #[repr(C, packed)]
@@ -183,11 +183,11 @@ pub type ECCrefPrivateKey = ECCrefPrivateKey_st;
 /// Original C struct
 /// ```c
 /// typedef struct ECCCipher_st {
-/// 	unsigned char x[ECCref_MAX_LEN];
-/// 	unsigned char y[ECCref_MAX_LEN];
-/// 	unsigned char M[32];
-/// 	unsigned int L;
-/// 	unsigned char C;
+///     unsigned char x[ECCref_MAX_LEN];
+///     unsigned char y[ECCref_MAX_LEN];
+///     unsigned char M[32];
+///     unsigned int L;
+///     unsigned char C;
 /// } ECCCipher;
 /// ```
 #[repr(C, packed)]
@@ -214,8 +214,8 @@ pub type ECCCipher = ECCCipher_st;
 /// Original C struct
 /// ```c
 /// typedef struct ECCSignature_st {
-/// 	unsigned char r[ECCref_MAX_LEN];
-/// 	unsigned char s[ECCref_MAX_LEN];
+///     unsigned char r[ECCref_MAX_LEN];
+///     unsigned char s[ECCref_MAX_LEN];
 /// } ECCSignature;
 /// ```
 #[repr(C)]
@@ -236,11 +236,11 @@ pub type ECCSignature = ECCSignature_st;
 /// Original C struct
 /// ```c
 /// typedef struct SDF_ENVELOPEDKEYBLOB {
-/// 	unsigned long Version;
-/// 	unsigned long ulSymmAlgID;
-/// 	ECCCipher ECCCipehrBlob;
-/// 	ECCrefPublicKey PubKey;
-/// 	unsigned char cbEncryptedPrivKey[ECCref_MAX_LEN];
+///     unsigned long Version;
+///     unsigned long ulSymmAlgID;
+/// ECCCipher ECCCipehrBlob;
+/// ECCrefPublicKey PubKey;
+///     unsigned char cbEncryptedPrivKey[ECCref_MAX_LEN];
 /// } SDF_ENVELOPEDKEYBLOB;
 /// ```
 #[repr(C, packed)]
@@ -692,15 +692,15 @@ unsafe extern "C" {
 }
 
 pub const RSAref_MAX_BITS: usize = 2048;
-pub const RSAref_MAX_LEN: usize = (RSAref_MAX_BITS + 7) / 8;
-pub const RSAref_MAX_PBITS: usize = (RSAref_MAX_BITS + 1) / 2;
-pub const RSAref_MAX_PLEN: usize = (RSAref_MAX_PBITS + 7) / 8;
+pub const RSAref_MAX_LEN: usize = RSAref_MAX_BITS.div_ceil(8);
+pub const RSAref_MAX_PBITS: usize = RSAref_MAX_BITS.div_ceil(2);
+pub const RSAref_MAX_PLEN: usize = RSAref_MAX_PBITS.div_ceil(8);
 pub const ECCref_MAX_BITS: usize = 512;
-pub const ECCref_MAX_LEN: usize = (ECCref_MAX_BITS + 7) / 8;
+pub const ECCref_MAX_LEN: usize = ECCref_MAX_BITS.div_ceil(8);
 
 /// for SGD_MAX_ECC_BITS_256
 pub const ECCref_256_MAX_BITS: usize = 256;
-pub const ECCref_256_MAX_LEN: usize = (ECCref_256_MAX_BITS + 7) / 8;
+pub const ECCref_256_MAX_LEN: usize = ECCref_256_MAX_BITS.div_ceil(8);
 
 /// Check size against constants
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]

@@ -82,6 +82,8 @@ pub mod symbol {
     }
     impl<T> SymbolBundle<T> {
         /// Get a pointer to a function or static variable by symbol name.
+        #[allow(clippy::missing_safety_doc)]
+        #[allow(clippy::missing_transmute_annotations)]
         pub unsafe fn new(
             lib: &Arc<Library>,
             sym: &[u8],
