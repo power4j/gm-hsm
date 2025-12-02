@@ -1,6 +1,7 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/power4j/gm-hsm/CI.yml)
 [![crates.io version badge](https://img.shields.io/crates/v/gm-hsm-sys?label=gm-hsm-sys)](https://crates.io/crates/gm-hsm-sys)
 [![crates.io version badge](https://img.shields.io/crates/v/gm-hsm-skf?label=gm-hsm-skf)](https://crates.io/crates/gm-hsm-skf)
+[![crates.io version badge](https://img.shields.io/crates/v/gm-hsm-sdf?label=gm-hsm-sdf)](https://crates.io/crates/gm-hsm-sdf)
 
 > This project is a rewrite of the [skf-rs](https://github.com/power4j/skf-rs) project to support more types of
 > cryptographic devices.
