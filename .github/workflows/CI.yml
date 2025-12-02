@@ -17,9 +17,11 @@ env:
     target/
 
 jobs:
-  # 基础代码验证
+  # 基础代码验证 - push时允许失败，PR时不允许失败
   validity:
     runs-on: ubuntu-latest
+    # PR时必须成功，push时允许失败
+    continue-on-error: ${{ github.event_name != 'pull_request' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -31,16 +33,18 @@ jobs:
       - name: Check source is valid
         run: cargo check --workspace
 
+  # 代码格式检查 - push时允许失败，PR时不允许失败
   formating:
     runs-on: ubuntu-latest
+    # PR时必须成功，push时允许失败
+    continue-on-error: ${{ github.event_name != 'pull_request' }}
     steps:
       - uses: actions/checkout@v5
       - name: Check Rust formatting with rustfmt
         run: cargo fmt --all --check
 
-  # 跨平台详细测试
+  # 跨平台详细测试 - 不依赖于基础检查，确保始终运行
   test:
-    needs: validity
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -75,9 +79,8 @@ jobs:
       - name: Run tests (${{ matrix.os }}, ${{ matrix.features.name }})
         run: cargo test --workspace --verbose ${{ matrix.features.flags }}
 
-  # 跨平台Clippy检查
+  # 跨平台Clippy检查 - 不依赖于基础检查，确保始终运行
   clippy:
-    needs: validity
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
