@@ -122,10 +122,10 @@ pub const unsafe fn first_two_null_byte(ptr: *const u8, len: usize) -> Option<us
 /// use gm_hsm_sys::utils::mem::parse_cstr;
 /// let ptr = b"Hello\0World\0".as_ptr();
 /// unsafe {
-///     assert_eq!(Some(CStr::from_ptr(c"Hello\0".as_ptr())), parse_cstr(ptr, 12));
-///     assert_eq!(Some(CStr::from_ptr(c"lo\0".as_ptr())), parse_cstr(ptr.add(3), 12));
-///     assert_eq!(Some(CStr::from_ptr(c"World\0".as_ptr())), parse_cstr(ptr.add(6), 12));
-///     assert_eq!(Some(CStr::from_ptr(c"\0".as_ptr())), parse_cstr(ptr.add(5), 1));
+///     assert_eq!(Some(CStr::from_bytes_with_nul(b"Hello\0").unwrap()), parse_cstr(ptr, 12));
+///     assert_eq!(Some(CStr::from_bytes_with_nul(b"lo\0").unwrap()), parse_cstr(ptr.add(3), 12));
+///     assert_eq!(Some(CStr::from_bytes_with_nul(b"World\0").unwrap()), parse_cstr(ptr.add(6), 12));
+///     assert_eq!(Some(CStr::from_bytes_with_nul(b"\0").unwrap()), parse_cstr(ptr.add(5), 1));
 ///     assert_eq!(None, parse_cstr(ptr, 1));
 /// }
 /// ```
@@ -158,15 +158,15 @@ pub unsafe fn parse_cstr_lossy(ptr: *const u8, len: usize) -> Option<String> {
 /// use gm_hsm_sys::utils::mem::parse_cstr_list;
 /// unsafe {
 ///     let list = parse_cstr_list(b"Hello\0World\0\0".as_ptr(), 13);
-///     assert_eq!(CStr::from_ptr(c"Hello\0".as_ptr()), *list.get(0).unwrap());
-///     assert_eq!(CStr::from_ptr(c"World\0".as_ptr()), *list.get(1).unwrap());
+///     assert_eq!(CStr::from_bytes_with_nul(b"Hello\0").unwrap(), *list.get(0).unwrap());
+///     assert_eq!(CStr::from_bytes_with_nul(b"World\0").unwrap(), *list.get(1).unwrap());
 ///
 ///     let list = parse_cstr_list(b"Hello\0World\0".as_ptr(), 12);
-///     assert_eq!(CStr::from_ptr(c"Hello\0".as_ptr()), *list.get(0).unwrap());
-///     assert_eq!(CStr::from_ptr(c"World\0".as_ptr()), *list.get(1).unwrap());
+///     assert_eq!(CStr::from_bytes_with_nul(b"Hello\0").unwrap(), *list.get(0).unwrap());
+///     assert_eq!(CStr::from_bytes_with_nul(b"World\0").unwrap(), *list.get(1).unwrap());
 ///
 ///     let list = parse_cstr_list(b"Hello\0World".as_ptr(), 11);
-///     assert_eq!(CStr::from_ptr(c"Hello\0".as_ptr()), *list.get(0).unwrap());
+///     assert_eq!(CStr::from_bytes_with_nul(b"Hello\0").unwrap(), *list.get(0).unwrap());
 ///
 ///     let list = parse_cstr_list(b"Hello".as_ptr(), 5);
 ///     assert!(list.is_empty());
@@ -264,14 +264,8 @@ mod tests {
             assert_eq!(1, list.len());
 
             let list = parse_cstr_list(b"Hello\0World\0\0".as_ptr(), 13);
-            assert_eq!(
-                c"Hello",
-                *list.first().unwrap()
-            );
-            assert_eq!(
-                c"World",
-                *list.get(1).unwrap()
-            );
+            assert_eq!(c"Hello", *list.first().unwrap());
+            assert_eq!(c"World", *list.get(1).unwrap());
         }
     }
     #[test]
