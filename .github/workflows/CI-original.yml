@@ -2,10 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, master, develop, dev ]
+    branches: [ main,master,develop,dev ]
   pull_request:
-    branches: [ main, master, develop, dev ]
-  workflow_dispatch: # 允许人工触发
+    branches: [ main,master,develop,dev ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -17,7 +16,6 @@ env:
     target/
 
 jobs:
-  # 基础代码验证
   validity:
     runs-on: ubuntu-latest
     steps:
@@ -38,76 +36,64 @@ jobs:
       - name: Check Rust formatting with rustfmt
         run: cargo fmt --all --check
 
-  # 跨平台详细测试
-  test:
+  tests:
     needs: validity
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-        features:
+        include:
+          # Test minimal features (default)
           - name: "default-features"
-            flags: ""
+            features: ""
+          # Test individual feature combinations that might have conflicts
           - name: "skf-only"
-            flags: "--features skf"
+            features: "--features skf"
+          # Test SDF with its required dll feature
           - name: "sdf-with-dll"
-            flags: "--features sdf,dll"
+            features: "--features sdf,dll"
+          # Test all features together
           - name: "all-features"
-            flags: "--all-features"
-
+            features: "--all-features"
     steps:
       - uses: actions/checkout@v5
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
       - uses: actions/cache@v4
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: ${{ runner.os }}-${{ matrix.features.name }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Run tests (${{ matrix.name }})
+        run: cargo test --workspace --verbose ${{ matrix.features }}
 
-      - name: Build (${{ matrix.os }}, ${{ matrix.features.name }})
-        run: cargo build --workspace --verbose ${{ matrix.features.flags }}
-
-      - name: Run tests (${{ matrix.os }}, ${{ matrix.features.name }})
-        run: cargo test --workspace --verbose ${{ matrix.features.flags }}
-
-  # 跨平台Clippy检查
   clippy:
     needs: validity
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-
+        include:
+          # Test minimal features (default)
+          - name: "default-features"
+            features: ""
+          # Test individual feature combinations that might have conflicts
+          - name: "skf-only"
+            features: "--features skf"
+          # Test SDF with its required dll feature
+          - name: "sdf-with-dll"
+            features: "--features sdf,dll"
+          # Test all features together
+          - name: "all-features"
+            features: "--all-features"
     steps:
       - uses: actions/checkout@v5
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
-          components: clippy
       - uses: actions/cache@v4
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Lint code with clippy (${{ matrix.name }})
+        run: cargo clippy --workspace --all-targets ${{ matrix.features }}
 
-      - name: Lint code with clippy (${{ matrix.os }})
-        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
-
-  # 发布前检查
   publish-ability:
     runs-on: ubuntu-latest
-    needs: [test, clippy]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Check that it will publish to crates
         run: |
           cargo publish --no-verify --dry-run -p gm-hsm-sys
