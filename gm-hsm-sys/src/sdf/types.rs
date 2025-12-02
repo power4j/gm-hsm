@@ -252,20 +252,24 @@ pub struct EnvelopedKeyBlob_st {
     pub PubKey: ECCrefPublicKey,
     pub cbEncryptedPrivKey: [::std::os::raw::c_uchar; 64usize],
 }
+// c_ulong is platform dependent
+const ULONG_SIZE: usize = ::std::mem::size_of::<::std::os::raw::c_ulong>();
+
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of EnvelopedKeyBlob_st"][::std::mem::size_of::<EnvelopedKeyBlob_st>() - 369usize];
+    const EXPECTED_SIZE: usize = ULONG_SIZE * 2 + 165 + 132 + 64;
+    ["Size of EnvelopedKeyBlob_st"][::std::mem::size_of::<EnvelopedKeyBlob_st>() - EXPECTED_SIZE];
     ["Alignment of EnvelopedKeyBlob_st"][::std::mem::align_of::<EnvelopedKeyBlob_st>() - 1usize];
     ["Offset of field: EnvelopedKeyBlob_st::Version"]
         [::std::mem::offset_of!(EnvelopedKeyBlob_st, Version) - 0usize];
     ["Offset of field: EnvelopedKeyBlob_st::ulSymmAlgID"]
-        [::std::mem::offset_of!(EnvelopedKeyBlob_st, ulSymmAlgID) - 4usize];
+        [::std::mem::offset_of!(EnvelopedKeyBlob_st, ulSymmAlgID) - ULONG_SIZE];
     ["Offset of field: EnvelopedKeyBlob_st::ECCCipehrBlob"]
-        [::std::mem::offset_of!(EnvelopedKeyBlob_st, ECCCipehrBlob) - 8usize];
+        [::std::mem::offset_of!(EnvelopedKeyBlob_st, ECCCipehrBlob) - (ULONG_SIZE * 2)];
     ["Offset of field: EnvelopedKeyBlob_st::PubKey"]
-        [::std::mem::offset_of!(EnvelopedKeyBlob_st, PubKey) - 173usize];
+        [::std::mem::offset_of!(EnvelopedKeyBlob_st, PubKey) - (ULONG_SIZE * 2 + 165)];
     ["Offset of field: EnvelopedKeyBlob_st::cbEncryptedPrivKey"]
-        [::std::mem::offset_of!(EnvelopedKeyBlob_st, cbEncryptedPrivKey) - 305usize];
+        [::std::mem::offset_of!(EnvelopedKeyBlob_st, cbEncryptedPrivKey) - (ULONG_SIZE * 2 + 165 + 132)];
 };
 pub type EnvelopedKeyBlob = EnvelopedKeyBlob_st;
 pub type PEnvelopedKeyBlob = *mut EnvelopedKeyBlob_st;
