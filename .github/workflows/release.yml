@@ -4,17 +4,56 @@ on:
   workflow_dispatch:
     inputs:
       gm-hsm-sys-version:
-        description: "gm-hsm-sys: major/minor/patch or semver or none if not updating derive crate"
+        description: "gm-hsm-sys: Version bump type or custom version"
         required: false
         default: "none"
+        type: choice
+        options:
+          - "none"
+          - "major"
+          - "minor"
+          - "patch"
+          - "alpha"
+          - "beta"
+          - "rc"
+      gm-hsm-sys-custom-version:
+        description: "gm-hsm-sys: Custom semver (e.g., 1.2.3, 1.2.3-alpha.1, 1.2.3-rc.1)"
+        required: false
+        default: ""
       gm-hsm-skf-version:
-        description: "gm-hsm-skf: major/minor/patch or semver or none if not updating derive crate"
+        description: "gm-hsm-skf: Version bump type or custom version"
         required: false
         default: "none"
+        type: choice
+        options:
+          - "none"
+          - "major"
+          - "minor"
+          - "patch"
+          - "alpha"
+          - "beta"
+          - "rc"
+      gm-hsm-skf-custom-version:
+        description: "gm-hsm-skf: Custom semver (e.g., 1.2.3, 1.2.3-alpha.1, 1.2.3-rc.1)"
+        required: false
+        default: ""
       gm-hsm-sdf-version:
-        description: "gm-hsm-sdf: major/minor/patch or semver or none if not updating derive crate"
+        description: "gm-hsm-sdf: Version bump type or custom version"
         required: false
         default: "none"
+        type: choice
+        options:
+          - "none"
+          - "major"
+          - "minor"
+          - "patch"
+          - "alpha"
+          - "beta"
+          - "rc"
+      gm-hsm-sdf-custom-version:
+        description: "gm-hsm-sdf: Custom semver (e.g., 1.2.3, 1.2.3-alpha.1, 1.2.3-rc.1)"
+        required: false
+        default: ""
 
 #permissions:                    # Global permissions configuration starts here
 #  contents: read                # 'read' access to repository contents
@@ -48,75 +87,164 @@ jobs:
         run: |
           cargo install -q cargo-get cargo-edit
 
-      - name: "[gm-hsm-sys] Bump"
-        if: "${{ github.event.inputs.gm-hsm-sys-version == 'major' || github.event.inputs.gm-hsm-sys-version == 'minor' || github.event.inputs.gm-hsm-sys-version == 'patch' }}"
-        #working-directory: ${{ github.workspace }}
+      # gm-hsm-sys release process
+      - name: "[gm-hsm-sys] Bump version"
+        if: "${{ github.event.inputs.gm-hsm-sys-version != 'none' }}"
         run: |
-          cargo set-version --bump ${{ github.event.inputs.gm-hsm-sys-version}} -p gm-hsm-sys
+          if [ "${{ github.event.inputs.gm-hsm-sys-version }}" = "alpha" ] || [ "${{ github.event.inputs.gm-hsm-sys-version }}" = "beta" ] || [ "${{ github.event.inputs.gm-hsm-sys-version }}" = "rc" ]; then
+            # Handle pre-release versions
+            PRE_SUFFIX="${{ github.event.inputs.gm-hsm-sys-version }}"
+            CURRENT_VERSION=$(cd gm-hsm-sys && cargo get package.version --pretty)
+            # Remove any existing pre-release suffix and bump patch version
+            BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/-.*//')
+            NEW_PATCH=$(echo $BASE_VERSION | awk -F. '{print $3}')
+            NEW_PATCH=$((NEW_PATCH + 1))
+            NEW_VERSION=$(echo $BASE_VERSION | awk -F. -v patch=$NEW_PATCH '{print $1"."$2"."$patch}')
+            # Set pre-release version with incrementing number
+            if echo $CURRENT_VERSION | grep -q "${PRE_SUFFIX}"; then
+              # Increment existing pre-release number
+              CURRENT_PRERELEASE=$(echo $CURRENT_VERSION | sed "s/.*-${PRE_SUFFIX}\.\?//" | grep -o '[0-9]*' | head -1)
+              if [ -z "$CURRENT_PRERELEASE" ]; then
+                CURRENT_PRERELEASE=1
+              else
+                CURRENT_PRERELEASE=$((CURRENT_PRERELEASE + 1))
+              fi
+            else
+              CURRENT_PRERELEASE=1
+            fi
+            FINAL_VERSION="${NEW_VERSION}-${PRE_SUFFIX}.${CURRENT_PRERELEASE}"
+            cargo set-version $FINAL_VERSION -p gm-hsm-sys
+          elif [ -n "${{ github.event.inputs.gm-hsm-sys-custom-version }}" ]; then
+            # Use custom version
+            cargo set-version "${{ github.event.inputs.gm-hsm-sys-custom-version }}" -p gm-hsm-sys
+          else
+            # Standard semantic version bump
+            cargo set-version --bump "${{ github.event.inputs.gm-hsm-sys-version }}" -p gm-hsm-sys
+          fi
           CRATE_TAG="$(cd gm-hsm-sys && cargo get package.name)-$(cd gm-hsm-sys && cargo get package.version --pretty)"
+          echo "CRATE_TAG=$CRATE_TAG" >> $GITHUB_ENV
+          echo "CRATE_NAME=gm-hsm-sys" >> $GITHUB_ENV
           git add .
           git commit -am "Release: $CRATE_TAG"
           git tag "$CRATE_TAG"
 
-      - name: "[gm-hsm-sys] Push"
+      - name: "[gm-hsm-sys] Push to repository"
+        if: "${{ github.event.inputs.gm-hsm-sys-version != 'none' }}"
         uses: ad-m/github-push-action@master
-        if: "${{ github.event.inputs.gm-hsm-sys-version == 'major' || github.event.inputs.gm-hsm-sys-version == 'minor' || github.event.inputs.gm-hsm-sys-version == 'patch' }}"
         with:
           branch: ${{ github.ref }}
           tags: true
 
-      - name: "[gm-hsm-sys] Publish"
-        if: "${{ github.event.inputs.gm-hsm-sys-version == 'major' || github.event.inputs.gm-hsm-sys-version == 'minor' || github.event.inputs.gm-hsm-sys-version == 'patch' }}"
+      - name: "[gm-hsm-sys] Publish to crates.io"
+        if: "${{ github.event.inputs.gm-hsm-sys-version != 'none' }}"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN  }}
         run: cargo publish --no-verify -p gm-hsm-sys
 
-
-      - name: "[gm-hsm-skf] Bump"
-        if: "${{ github.event.inputs.gm-hsm-skf-version == 'major' || github.event.inputs.gm-hsm-skf-version == 'minor' || github.event.inputs.gm-hsm-skf-version == 'patch' }}"
-        #working-directory: ${{ github.workspace }}
-        shell: bash
+      # gm-hsm-skf release process
+      - name: "[gm-hsm-skf] Bump version"
+        if: "${{ github.event.inputs.gm-hsm-skf-version != 'none' }}"
         run: |
-          cargo set-version --bump ${{ github.event.inputs.gm-hsm-skf-version}} -p gm-hsm-skf
+          if [ "${{ github.event.inputs.gm-hsm-skf-version }}" = "alpha" ] || [ "${{ github.event.inputs.gm-hsm-skf-version }}" = "beta" ] || [ "${{ github.event.inputs.gm-hsm-skf-version }}" = "rc" ]; then
+            # Handle pre-release versions
+            PRE_SUFFIX="${{ github.event.inputs.gm-hsm-skf-version }}"
+            CURRENT_VERSION=$(cd gm-hsm-skf && cargo get package.version --pretty)
+            # Remove any existing pre-release suffix and bump patch version
+            BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/-.*//')
+            NEW_PATCH=$(echo $BASE_VERSION | awk -F. '{print $3}')
+            NEW_PATCH=$((NEW_PATCH + 1))
+            NEW_VERSION=$(echo $BASE_VERSION | awk -F. -v patch=$NEW_PATCH '{print $1"."$2"."$patch}')
+            # Set pre-release version with incrementing number
+            if echo $CURRENT_VERSION | grep -q "${PRE_SUFFIX}"; then
+              # Increment existing pre-release number
+              CURRENT_PRERELEASE=$(echo $CURRENT_VERSION | sed "s/.*-${PRE_SUFFIX}\.\?//" | grep -o '[0-9]*' | head -1)
+              if [ -z "$CURRENT_PRERELEASE" ]; then
+                CURRENT_PRERELEASE=1
+              else
+                CURRENT_PRERELEASE=$((CURRENT_PRERELEASE + 1))
+              fi
+            else
+              CURRENT_PRERELEASE=1
+            fi
+            FINAL_VERSION="${NEW_VERSION}-${PRE_SUFFIX}.${CURRENT_PRERELEASE}"
+            cargo set-version $FINAL_VERSION -p gm-hsm-skf
+          elif [ -n "${{ github.event.inputs.gm-hsm-skf-custom-version }}" ]; then
+            # Use custom version
+            cargo set-version "${{ github.event.inputs.gm-hsm-skf-custom-version }}" -p gm-hsm-skf
+          else
+            # Standard semantic version bump
+            cargo set-version --bump "${{ github.event.inputs.gm-hsm-skf-version }}" -p gm-hsm-skf
+          fi
           CRATE_TAG="$(cd gm-hsm-skf && cargo get package.name)-$(cd gm-hsm-skf && cargo get package.version --pretty)"
+          echo "CRATE_TAG=$CRATE_TAG" >> $GITHUB_ENV
+          echo "CRATE_NAME=gm-hsm-skf" >> $GITHUB_ENV
           git add .
           git commit -am "Release: $CRATE_TAG"
           git tag "$CRATE_TAG"
 
-      - name: "[gm-hsm-skf] Push"
+      - name: "[gm-hsm-skf] Push to repository"
+        if: "${{ github.event.inputs.gm-hsm-skf-version != 'none' }}"
         uses: ad-m/github-push-action@master
-        if: "${{ github.event.inputs.gm-hsm-skf-version == 'major' || github.event.inputs.gm-hsm-skf-version == 'minor' || github.event.inputs.gm-hsm-skf-version == 'patch' }}"
         with:
           branch: ${{ github.ref }}
           tags: true
 
-      - name: "[gm-hsm-skf] Publish"
-        if: "${{ github.event.inputs.gm-hsm-skf-version == 'major' || github.event.inputs.gm-hsm-skf-version == 'minor' || github.event.inputs.gm-hsm-skf-version == 'patch' }}"
+      - name: "[gm-hsm-skf] Publish to crates.io"
+        if: "${{ github.event.inputs.gm-hsm-skf-version != 'none' }}"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN  }}
         run: cargo publish --no-verify -p gm-hsm-skf
 
-
-      - name: "[gm-hsm-sdf] Bump"
-        if: "${{ github.event.inputs.gm-hsm-sdf-version == 'major' || github.event.inputs.gm-hsm-sdf-version == 'minor' || github.event.inputs.gm-hsm-sdf-version == 'patch' }}"
-        #working-directory: ${{ github.workspace }}
-        shell: bash
+      # gm-hsm-sdf release process
+      - name: "[gm-hsm-sdf] Bump version"
+        if: "${{ github.event.inputs.gm-hsm-sdf-version != 'none' }}"
         run: |
-          cargo set-version --bump ${{ github.event.inputs.gm-hsm-sdf-version}} -p gm-hsm-sdf
+          if [ "${{ github.event.inputs.gm-hsm-sdf-version }}" = "alpha" ] || [ "${{ github.event.inputs.gm-hsm-sdf-version }}" = "beta" ] || [ "${{ github.event.inputs.gm-hsm-sdf-version }}" = "rc" ]; then
+            # Handle pre-release versions
+            PRE_SUFFIX="${{ github.event.inputs.gm-hsm-sdf-version }}"
+            CURRENT_VERSION=$(cd gm-hsm-sdf && cargo get package.version --pretty)
+            # Remove any existing pre-release suffix and bump patch version
+            BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/-.*//')
+            NEW_PATCH=$(echo $BASE_VERSION | awk -F. '{print $3}')
+            NEW_PATCH=$((NEW_PATCH + 1))
+            NEW_VERSION=$(echo $BASE_VERSION | awk -F. -v patch=$NEW_PATCH '{print $1"."$2"."$patch}')
+            # Set pre-release version with incrementing number
+            if echo $CURRENT_VERSION | grep -q "${PRE_SUFFIX}"; then
+              # Increment existing pre-release number
+              CURRENT_PRERELEASE=$(echo $CURRENT_VERSION | sed "s/.*-${PRE_SUFFIX}\.\?//" | grep -o '[0-9]*' | head -1)
+              if [ -z "$CURRENT_PRERELEASE" ]; then
+                CURRENT_PRERELEASE=1
+              else
+                CURRENT_PRERELEASE=$((CURRENT_PRERELEASE + 1))
+              fi
+            else
+              CURRENT_PRERELEASE=1
+            fi
+            FINAL_VERSION="${NEW_VERSION}-${PRE_SUFFIX}.${CURRENT_PRERELEASE}"
+            cargo set-version $FINAL_VERSION -p gm-hsm-sdf
+          elif [ -n "${{ github.event.inputs.gm-hsm-sdf-custom-version }}" ]; then
+            # Use custom version
+            cargo set-version "${{ github.event.inputs.gm-hsm-sdf-custom-version }}" -p gm-hsm-sdf
+          else
+            # Standard semantic version bump
+            cargo set-version --bump "${{ github.event.inputs.gm-hsm-sdf-version }}" -p gm-hsm-sdf
+          fi
           CRATE_TAG="$(cd gm-hsm-sdf && cargo get package.name)-$(cd gm-hsm-sdf && cargo get package.version --pretty)"
+          echo "CRATE_TAG=$CRATE_TAG" >> $GITHUB_ENV
+          echo "CRATE_NAME=gm-hsm-sdf" >> $GITHUB_ENV
           git add .
           git commit -am "Release: $CRATE_TAG"
           git tag "$CRATE_TAG"
 
-      - name: "[gm-hsm-sdf] Push"
+      - name: "[gm-hsm-sdf] Push to repository"
+        if: "${{ github.event.inputs.gm-hsm-sdf-version != 'none' }}"
         uses: ad-m/github-push-action@master
-        if: "${{ github.event.inputs.gm-hsm-sdf-version == 'major' || github.event.inputs.gm-hsm-sdf-version == 'minor' || github.event.inputs.gm-hsm-sdf-version == 'patch' }}"
         with:
           branch: ${{ github.ref }}
           tags: true
 
-      - name: "[gm-hsm-sdf] Publish"
-        if: "${{ github.event.inputs.gm-hsm-sdf-version == 'major' || github.event.inputs.gm-hsm-sdf-version == 'minor' || github.event.inputs.gm-hsm-sdf-version == 'patch' }}"
+      - name: "[gm-hsm-sdf] Publish to crates.io"
+        if: "${{ github.event.inputs.gm-hsm-sdf-version != 'none' }}"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN  }}
         run: cargo publish --no-verify -p gm-hsm-sdf
