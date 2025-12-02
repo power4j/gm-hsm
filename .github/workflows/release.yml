@@ -113,10 +113,13 @@ jobs:
               CURRENT_PRERELEASE=1
             fi
             FINAL_VERSION="${NEW_VERSION}-${PRE_SUFFIX}.${CURRENT_PRERELEASE}"
-            cargo set-version $FINAL_VERSION -p gm-hsm-sys
+            # Remove 'v' prefix if present and add quotes
+            CLEAN_VERSION=$(echo $FINAL_VERSION | sed 's/^v//')
+            cargo set-version "$CLEAN_VERSION" -p gm-hsm-sys
           elif [ -n "${{ github.event.inputs.gm-hsm-sys-custom-version }}" ]; then
-            # Use custom version
-            cargo set-version "${{ github.event.inputs.gm-hsm-sys-custom-version }}" -p gm-hsm-sys
+            # Use custom version (remove 'v' prefix if present)
+            CLEAN_CUSTOM_VERSION=$(echo "${{ github.event.inputs.gm-hsm-sys-custom-version }}" | sed 's/^v//')
+            cargo set-version "$CLEAN_CUSTOM_VERSION" -p gm-hsm-sys
           else
             # Standard semantic version bump
             cargo set-version --bump "${{ github.event.inputs.gm-hsm-sys-version }}" -p gm-hsm-sys
@@ -167,10 +170,13 @@ jobs:
               CURRENT_PRERELEASE=1
             fi
             FINAL_VERSION="${NEW_VERSION}-${PRE_SUFFIX}.${CURRENT_PRERELEASE}"
-            cargo set-version $FINAL_VERSION -p gm-hsm-skf
+            # Remove 'v' prefix if present and add quotes
+            CLEAN_VERSION=$(echo $FINAL_VERSION | sed 's/^v//')
+            cargo set-version "$CLEAN_VERSION" -p gm-hsm-skf
           elif [ -n "${{ github.event.inputs.gm-hsm-skf-custom-version }}" ]; then
-            # Use custom version
-            cargo set-version "${{ github.event.inputs.gm-hsm-skf-custom-version }}" -p gm-hsm-skf
+            # Use custom version (remove 'v' prefix if present)
+            CLEAN_CUSTOM_VERSION=$(echo "${{ github.event.inputs.gm-hsm-skf-custom-version }}" | sed 's/^v//')
+            cargo set-version "$CLEAN_CUSTOM_VERSION" -p gm-hsm-skf
           else
             # Standard semantic version bump
             cargo set-version --bump "${{ github.event.inputs.gm-hsm-skf-version }}" -p gm-hsm-skf
@@ -221,10 +227,13 @@ jobs:
               CURRENT_PRERELEASE=1
             fi
             FINAL_VERSION="${NEW_VERSION}-${PRE_SUFFIX}.${CURRENT_PRERELEASE}"
-            cargo set-version $FINAL_VERSION -p gm-hsm-sdf
+            # Remove 'v' prefix if present and add quotes
+            CLEAN_VERSION=$(echo $FINAL_VERSION | sed 's/^v//')
+            cargo set-version "$CLEAN_VERSION" -p gm-hsm-sdf
           elif [ -n "${{ github.event.inputs.gm-hsm-sdf-custom-version }}" ]; then
-            # Use custom version
-            cargo set-version "${{ github.event.inputs.gm-hsm-sdf-custom-version }}" -p gm-hsm-sdf
+            # Use custom version (remove 'v' prefix if present)
+            CLEAN_CUSTOM_VERSION=$(echo "${{ github.event.inputs.gm-hsm-sdf-custom-version }}" | sed 's/^v//')
+            cargo set-version "$CLEAN_CUSTOM_VERSION" -p gm-hsm-sdf
           else
             # Standard semantic version bump
             cargo set-version --bump "${{ github.event.inputs.gm-hsm-sdf-version }}" -p gm-hsm-sdf
