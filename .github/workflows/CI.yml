@@ -22,7 +22,7 @@ jobs:
     # PR时必须成功，push时允许失败
     continue-on-error: ${{ github.event_name != 'pull_request' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - uses: actions/cache@v4
         with:
@@ -37,7 +37,7 @@ jobs:
     # PR时必须成功，push时允许失败
     continue-on-error: ${{ github.event_name != 'pull_request' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Check Rust formatting with rustfmt
         run: cargo fmt --all --check
 
@@ -61,7 +61,7 @@ jobs:
             flags: "--all-features"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
@@ -87,7 +87,7 @@ jobs:
           - macos-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, clippy]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Check that it will publish to crates
         run: |
