@@ -16,7 +16,7 @@ keywords = ["GM", "cryptography", "PKI"]
 categories = ["hardware-support"]
 
 [dependencies]
-gm-hsm-sys = { path = "../gm-hsm-sys", version = "0.1.2", features = ["sdf", "dll"] }
+gm-hsm-sys = { path = "../gm-hsm-sys", version = "0.2.0-beta.1", features = ["sdf", "dll"] }
 tracing = "0.1"
 thiserror = "2"
 anyhow = "1"
