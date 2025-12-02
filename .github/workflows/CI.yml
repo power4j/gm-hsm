@@ -5,6 +5,7 @@ on:
     branches: [ main, master, develop, dev ]
   pull_request:
     branches: [ main, master, develop, dev ]
+  workflow_dispatch: # 允许人工触发
 
 env:
   CARGO_TERM_COLOR: always
@@ -37,8 +38,8 @@ jobs:
       - name: Check Rust formatting with rustfmt
         run: cargo fmt --all --check
 
-  # 跨平台编译测试（核心功能）
-  cross-platform-build:
+  # 跨平台详细测试
+  test:
     needs: validity
     runs-on: ${{ matrix.os }}
     strategy:
@@ -49,8 +50,12 @@ jobs:
           - windows-latest
           - macos-latest
         features:
-          - name: "default"
+          - name: "default-features"
             flags: ""
+          - name: "skf-only"
+            flags: "--features skf"
+          - name: "sdf-with-dll"
+            flags: "--features sdf,dll"
           - name: "all-features"
             flags: "--all-features"
 
@@ -62,37 +67,13 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ env.CACHE_PATHS }}
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.features.name }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build (${{ matrix.os }}, ${{ matrix.features.name }})
         run: cargo build --workspace --verbose ${{ matrix.features.flags }}
 
-  # 详细测试（仅在Ubuntu运行，减少CI时间）
-  detailed-tests:
-    needs: validity
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          # 测试不同特性组合
-          - name: "default-features"
-            features: ""
-          - name: "skf-only"
-            features: "--features skf"
-          - name: "sdf-with-dll"
-            features: "--features sdf,dll"
-          - name: "all-features"
-            features: "--all-features"
-
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.CACHE_PATHS }}
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Run tests (${{ matrix.name }})
-        run: cargo test --workspace --verbose ${{ matrix.features }}
+      - name: Run tests (${{ matrix.os }}, ${{ matrix.features.name }})
+        run: cargo test --workspace --verbose ${{ matrix.features.flags }}
 
   # 跨平台Clippy检查
   clippy:
@@ -120,34 +101,10 @@ jobs:
       - name: Lint code with clippy (${{ matrix.os }})
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-  # Windows平台特定测试（验证我们修复的问题）
-  windows-specific-tests:
-    needs: cross-platform-build
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.CACHE_PATHS }}
-          key: ${{ runner.os }}-cargo-windows-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Test Windows compilation (c_ulong = 4 bytes)
-        run: |
-          cargo build --workspace --verbose --all-features
-          cargo test --workspace --verbose --all-features
-
-      - name: Verify c_ulong size expectations
-        run: |
-          # 验证我们的修复是否正确处理了平台差异
-          cargo check --workspace --all-features
-
   # 发布前检查
   publish-ability:
     runs-on: ubuntu-latest
-    needs: [cross-platform-build, clippy]
+    needs: [test, clippy]
     steps:
       - uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
