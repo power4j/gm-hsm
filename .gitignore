@@ -65,6 +65,6 @@ temp/
 .claude/
 .specify/
 openspec/
-AGENTS.md
-CLAUDE.md
+#AGENTS.md
+#CLAUDE.md
 .mcp.json
