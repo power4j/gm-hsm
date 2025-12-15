@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ${{ env.CACHE_PATHS }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
@@ -65,7 +65,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ${{ env.CACHE_PATHS }}
           key: ${{ runner.os }}-${{ matrix.features.name }}-cargo-${{ hashFiles('**/Cargo.lock') }}
@@ -92,7 +92,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ${{ env.CACHE_PATHS }}
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
